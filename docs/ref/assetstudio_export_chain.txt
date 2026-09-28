@@ -1,0 +1,102 @@
+Cadeia de chamadas completa
+1. Click Handler — AssetStudioGUIForm.cs:1372-1375
+O menu item exportSelectedObjectsmergeWithAnimationClipToolStripMenuItem dispara:
+
+
+private void exportSelectedObjectsmergeWithAnimationClipToolStripMenuItem_Click(...)
+{
+    ExportMergeObjects(true);  // true = incluir AnimationClips
+}
+2. ExportMergeObjects — AssetStudioGUIForm.cs:1377-1410
+Orquestra a coleta de dados:
+
+Coleta GameObjects — chama GetSelectedParentNode() que percorre recursivamente a sceneTreeView e coleta todos os nós marcados (checked)
+Abre SaveFileDialog — nome padrão: "NomeDoObjeto (merge).fbx"
+Coleta AnimationClips — chama GetSelectedAssets() e filtra apenas ClassIDType.AnimationClip
+Dispara o export — chama ExportObjectsMergeWithAnimationClip(path, gameObjects, animationList)
+3. ExportObjectsMergeWithAnimationClip — Studio.cs:644-667
+Executa em thread pool (ThreadPool.QueueUserWorkItem) para não travar a UI, e chama:
+
+
+ExportGameObjectMerge(gameObjects, exportPath, animationList);
+4. ExportGameObjectMerge — Exporter.cs:301-308
+Cria o ModelConverter com o construtor de merge:
+
+
+var convert = new ModelConverter(rootName, gameObjects, convertType, animationClips);
+ExportFbx(convert, exportPath);
+5. ModelConverter (construtor merge) — ModelConverter.cs:51-79
+Este é o coração do merge:
+
+
+1. CreateFrame(rootName)           → Cria um frame raiz sintético
+2. foreach GameObject:
+   ├─ ConvertTransforms(transform, RootFrame)  → Hierarquia vira filha da raiz
+   └─ CreateBonePathHash(transform)            → Mapeia caminhos dos bones
+3. foreach GameObject:
+   └─ ConvertMeshRenderer(transform)           → Coleta todas as meshes
+4. foreach AnimationClip:
+   └─ animationClipHashSet.Add(clip)           → Adiciona os clips selecionados
+5. ConvertAnimations()                          → Converte todos os clips
+   └─ FixBonePath(clip, path)                  → Ajusta paths para hierarquia merged
+Diferença do export normal: em vez de cada GameObject ser raiz do próprio FBX, aqui todos viram filhos de um frame raiz único sintético.
+
+6. ExportFbx — Exporter.cs:310-327
+Lê as settings do usuário (eulerFilter, scaleFactor, fbxVersion, etc.) e chama:
+
+
+ModelExporter.ExportFbx(exportPath, convert, ...settings...);
+7. Fbx.Exporter.Export — Fbx.cs:30-53
+Cria o FbxExporter nativo e chama ExportAll().
+
+8. FbxExporter.ExportAll — FbxExporter.cs:81-113
+Escrita final do FBX:
+
+
+ExportRootFrame(meshFrames)          → Frame raiz + hierarquia
+SetJointsFromImportedMeshes()        → Configura joints/bones
+PrepareMaterials()                   → Prepara materiais
+ExportMeshFrames(root, meshFrames)   → Exporta todas as meshes
+ExportMorphs()                       → Blend shapes (se habilitado)
+ExportAnimations(eulerFilter, prec)  → EXPORTA TODOS OS ANIMATIONCLIPS
+ExportScene()                        → Finaliza o arquivo .fbx
+Diagrama resumido
+
+UI Click
+  └─ ExportMergeObjects(animation=true)
+       ├─ GetSelectedParentNode()  →  List<GameObject>
+       ├─ GetSelectedAssets()      →  List<AnimationClip>
+       └─ ExportObjectsMergeWithAnimationClip()  [thread pool]
+            └─ ExportGameObjectMerge()
+                 ├─ new ModelConverter(merge)
+                 │    ├─ Raiz sintética
+                 │    ├─ Transforms → filhos da raiz
+                 │    ├─ Meshes coletadas
+                 │    ├─ AnimationClips adicionados
+                 │    └─ ConvertAnimations() + FixBonePath()
+                 └─ ExportFbx()
+                      └─ FbxExporter.ExportAll()
+                           └─ arquivo .fbx final
+
+
+
+O projeto AssetStudio lida com merge de assets em múltiplas camadas:
+
+1. Merge de arquivos split (nível de arquivo)
+Em ImportHelper.cs, o método MergeSplitAssets busca arquivos .split0, .split1, .split2... e os concatena sequencialmente em um único arquivo usando CopyTo(). Isso acontece antes de qualquer processamento. O método ProcessingSplitFiles filtra os .split da lista e adiciona o arquivo já mergeado.
+
+O mesmo padrão se repete para ZIPs em AssetsManager.cs:277-303, onde splits dentro de arquivos ZIP são combinados em um MemoryStream.
+
+2. Montagem de blocos (nível de bundle)
+Em BundleFile.cs, o método ReadBlocks descomprime múltiplos blocos (LZMA, LZ4, LZ4HC ou sem compressão) e os escreve sequencialmente em um único blocksStream. Depois, ReadFiles extrai cada arquivo individual desse stream unificado usando offsets.
+
+3. Referências entre arquivos (nível de objeto)
+Em PPtr.cs, assets podem referenciar objetos em outros arquivos via m_FileID e m_PathID. O método TryGetAssetsFile() resolve a referência externa consultando a lista m_Externals do SerializedFile — sem merge físico, apenas resolução por referência com cache.
+
+4. Dados de streaming externos (nível de recurso)
+Em ResourceReader.cs, dados de Texture2D, AudioClip e Mesh podem estar em arquivos separados (.resS, .bank). O ResourceReader mantém offset e tamanho para extrair os dados do arquivo de recurso correto.
+
+Pipeline geral
+
+MergeSplitAssets()  →  ProcessingSplitFiles()  →  Load()  →  ReadAssets()  →  ProcessAssets()
+     (1)                      (1)                  (2,3)        (4)            (linking)

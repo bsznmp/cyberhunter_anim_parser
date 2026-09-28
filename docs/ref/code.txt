@@ -1,0 +1,150 @@
+Pipeline: Code → Style Fingerprint → Code Generator
+1. Visão geral
+INPUT (código)
+   ↓
+[1] Pattern Extraction
+   ↓
+[2] Pattern Classification
+   ↓
+[3] Style Fingerprint (normalizado + ponderado) + (padrão é DTO (Data Transfer Object) aliado ao conceito de Decoupling (Desacoplamento) ou Separation of Concerns (Separação de Preocupações).)
+   ↓
+[4] Style-Constrained Code Generation
+   ↓
+OUTPUT (código novo com mesmo "DNA")
+
+
+
+
+Style Fingerprint (resultado da análise)
+{
+  "style_fingerprint": {
+    "meta": {
+      "paradigm": "imperative",
+      "modularity": "medium",
+      "state_management": "global-heavy",
+      "abstraction_level": "medium"
+    },
+
+    "naming": {
+      "convention": "camelCase",
+      "prefixes": {
+        "boolean": "b",
+        "integer": "i",
+        "float": "f",
+        "string": "s"
+      },
+      "function_style": "verb-based",
+      "class_style": "PascalCase",
+      "local_variables": "short_names"
+    },
+
+    "control_flow": {
+      "early_return": true,
+      "loop_style": ["for-range", "manual-while"],
+      "branch_density": "high",
+      "nesting_depth": "medium"
+    },
+
+    "error_handling": {
+      "strategy": "local",
+      "pattern": "print + return",
+      "exception_usage": "try/except local",
+      "failure_return": [0, null]
+    },
+
+    "data_access": {
+      "pattern": "seek_read_restore",
+      "helpers": ["readUIntAt", "readUShortAt"],
+      "validation": "range_checks"
+    },
+
+    "structure": {
+      "order": [
+        "imports",
+        "globals",
+        "registration",
+        "utilities",
+        "classes",
+        "handlers"
+      ]
+    },
+
+    "patterns": {
+      "global_flags": true,
+      "config_maps": true,
+      "helper_functions": true,
+      "binary_parsing": true
+    },
+
+    "weights": {
+      "control_flow": 0.9,
+      "error_handling": 0.9,
+      "data_access": 0.85,
+      "structure": 0.8,
+      "naming": 0.6,
+      "formatting": 0.3
+    }
+  }
+}
+
+
+Prompt principal
+Modo: style-constrained generation + DTO + Decoupling (Desacoplamento) ou Separation of Concerns (Separação de Preocupações).
+
+Entrada:
+- style_fingerprint
+- novo problema
+
+Objetivo:
+Gerar código que resolva o novo problema replicando o estilo.
+
+Regras:
+
+1. PRESERVAR (baseado no peso):
+   - >= 0.8 → obrigatório
+   - 0.5–0.8 → preferencial
+   - < 0.5 → opcional
+
+2. PROIBIDO:
+   - Reutilizar lógica original
+   - Copiar estruturas diretamente
+
+3. OBRIGATÓRIO:
+   - Reproduzir padrões de:
+     - controle de fluxo
+     - tratamento de erro
+     - acesso a dados
+     - organização de código
+
+4. Heurística:
+   "Como esse autor resolveria esse novo problema?"
+
+5. Validação interna:
+   - Mesmo "ritmo" de execução?
+   - Mesmo nível de paranoia (validação)?
+   - Mesmo uso de estado?
+
+5.1. DTO (Data Transfer Object) aliado ao conceito de Decoupling (Desacoplamento) ou Separation of Concerns (Separação de Preocupações).
+
+Output:
+- Código direto
+
+
+alidação automática
+Checklist:
+
+[ ] Usa early return?
+[ ] Tem validação defensiva?
+[ ] Usa padrões de leitura similares?
+[ ] Mantém estrutura global semelhante?
+[ ] Naming consistente com fingerprint?
+[ ] Erro tratado localmente?
+
+Se <80% → regenerar
+
+
+
+Style Signature Hash (identidade)
+hash = hash(control_flow + error_handling + data_access)
+
+→ útil pra comparar estilos

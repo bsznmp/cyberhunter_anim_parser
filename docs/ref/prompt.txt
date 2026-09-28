@@ -1,0 +1,224 @@
+🧠 📦 Roteiro Estruturado de Análise Inicial de Binário (Foco: Animação 3D)
+1. Fase de Coleta Controlada (Ground Truth)
+1.1 Execução obrigatória (baseline)
+
+Você deve executar:
+
+file dump.bin
+hexdump -C dump.bin | head -n 50
+strings -n 6 dump.bin | head -n 50
+
+Opcional (mas recomendado):
+
+xxd dump.bin | head -n 50
+1.2 Objetivo real (não técnico, mas crítico)
+
+Você NÃO está analisando o formato ainda.
+
+Você está respondendo apenas:
+
+Existe estrutura ou é ruído?
+Existe texto semântico?
+Existe repetição?
+Existe assinatura (magic bytes)?
+1.3 Classificação imediata (decisão)
+
+Após olhar os outputs, você deve classificar o arquivo em UMA categoria:
+
+Tipo	Ação
+Estruturado	seguir para parsing
+Comprimido	voltar e descomprimir
+Container	buscar offsets internos
+Híbrido	separar blocos
+🔥 Insight crítico
+
+Essa decisão define TODO o resto do pipeline.
+
+2. Inspeção Hex com Hipóteses Controladas
+2.1 Leitura orientada (não aleatória)
+
+Abra no hex e observe:
+
+padrões repetidos (stride implícito)
+blocos fixos (32, 48, 64 bytes)
+regiões distintas (header vs dados)
+2.2 Heurísticas específicas para animação 3D
+
+Procure por:
+
+3 floats seguidos → posição (XYZ)
+4 floats → quaternion
+16 floats → matriz
+valores entre -1 e 1 → rotação
+valores pequenos → offsets locais de bone
+2.3 Detecção de regiões
+
+Você deve mentalmente segmentar:
+
+[HEADER][MESH?][SKELETON][ANIMATION][UNKNOWN]
+🔥 Ponto de atenção
+
+Se tudo parece homogêneo → pode estar comprimido ou interleaved.
+
+3. Inferência de Endianness e Tipos
+3.1 Teste obrigatório
+
+Você deve testar ambos:
+
+struct.unpack('<f', data)
+struct.unpack('>f', data)
+3.2 Critério de decisão
+
+Escolha o que gera:
+
+valores plausíveis (0–10 para posição)
+consistência ao longo do arquivo
+3.3 Detecção de tipo
+
+Você deve diferenciar:
+
+Tipo	Comportamento
+float	contínuo
+int	discreto
+bitfield	padrões repetidos
+🔥 Insight
+
+80% dos erros aqui são “parece válido, mas não é”.
+
+4. Teste de Estrutura (Micro-Parsing)
+4.1 Estratégia correta
+
+NUNCA parsear tudo.
+
+Você deve:
+
+escolher 16–64 bytes
+testar leitura controlada
+4.2 Exemplo prático
+import struct
+
+data = open("dump.bin", "rb").read()
+
+for i in range(0, 64, 4):
+    try:
+        print(struct.unpack('<f', data[i:i+4]))
+    except:
+        pass
+4.3 Objetivo
+detectar regiões “vivas”
+identificar padrões repetidos
+5. Identificação de Estruturas Repetitivas
+5.1 Detectar stride
+
+Você deve testar:
+
+32 bytes
+36 bytes
+48 bytes
+64 bytes
+5.2 Sinais de struct
+repetição perfeita
+padrões semelhantes por bloco
+pequenas variações (dados)
+🔥 Insight
+
+Se você achou stride → você achou o formato base.
+
+6. Heurística para Animação (Avançado)
+6.1 Detectar keyframes
+
+Procure por:
+
+sequência crescente (tempo)
+blocos repetidos por bone
+valores próximos a zero (idle)
+6.2 Detectar quaternions
+4 floats
+soma dos quadrados ≈ 1
+6.3 Detectar track-based
+
+Se os dados não são lineares:
+
+podem estar organizados por:
+bone
+canal (pos/rot/scale)
+🔥 Insight crítico
+
+Animação raramente é “array simples”.
+
+📄 7. Formato de Relatório (Padronizado Profissional)
+📊 Relatório Inicial
+Tipo do arquivo
+provável: binário proprietário / container / comprimido
+evidência: ausência de magic bytes padrão / presença de offsets / entropia
+Estrutura observada
+blocos de X bytes repetidos → possível struct
+regiões distintas → header / dados
+possível segmentação: mesh / skeleton / animation
+Padrões identificados
+floats repetidos → vetores
+blocos de 16 bytes → quaternion/matriz
+valores normalizados (-1 a 1) → rotação
+sequências crescentes → timestamps
+Strings relevantes
+“bone”, “anim”, “frame” → sistema de animação
+nomes anatômicos → skeleton
+termos técnicos → engine interno
+Hipóteses (não conclusões)
+estrutura baseada em keyframes
+uso de quaternion para rotação
+possível interleaving de dados
+possível separação lógica por seções
+Próximos passos
+identificar stride exato
+validar leitura com struct.unpack
+testar endianness
+localizar blocos de animação
+isolar 1 bone para teste
+⚠️ 8. Riscos Críticos (Realistas)
+🚨 Interpretar cedo demais
+
+Você “acha” que entendeu e força o parser.
+✔ Sempre validar com evidência visual ou repetição.
+
+🚨 Endianness errado
+
+✔ Sempre testar LE e BE antes de decidir.
+
+🚨 Confundir float/int
+
+✔ Validar ranges + comportamento.
+
+🚨 Ignorar compressão
+
+✔ Se parece ruído → provavelmente está comprimido.
+
+🚨 Ignorar interleaving
+
+✔ Dados podem estar misturados por vértice.
+
+🚨 Assumir animação linear
+
+✔ Pode ser track-based.
+
+🎯 9. Dica de Ouro (Operacional)
+Teste mínimo obrigatório
+import struct
+
+data = bytes.fromhex("00 00 80 3F 00 00 00 40")
+print(struct.unpack('<ff', data))
+Expansão prática
+
+Teste offsets reais:
+
+for i in range(0, 128, 4):
+    try:
+        print(i, struct.unpack('<f', data[i:i+4]))
+    except:
+        pass
+Interpretação
+valores coerentes → região válida
+valores absurdos → tipo ou endian errado
+🧠 Regra Final (nível profissional)
+
+“Sem hipótese validada, não existe parsing — existe chute.”

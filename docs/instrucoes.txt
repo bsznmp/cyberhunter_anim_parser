@@ -1,0 +1,180 @@
+================================================================================
+ INSTRUCOES DE USO — DTO Pipeline NeoX
+================================================================================
+
+1. VISAO GERAL
+
+   O pipeline parseia arquivos NeoX e retorna DTOs (Data Transfer Objects) que
+   servem como contratos de dados imutaveis entre parsers e consumidores
+   (FBX writer, viewport 3D, assembler multi-mesh).
+
+   Fluxo completo:
+
+   .gim  → gim_parser.py:parse_gim(path)   → GimDTO   (manifesto do asset)
+     ↓
+   .mesh → parser.py:parse_mesh(path)       → MeshDTO  (geometria + skeleton)
+   .gis  → (Phase 2) gis_parser.py          → GisDTO   (skeleton + animacoes)
+     ↓
+   MergeDTO(root_name, [MeshDTO, ...], GisDTO) → blender_merge_fbx.py → .fbx
+
+   Ponto de entrada tipico (a partir do .gim):
+
+       from core.gim_parser import parse_gim
+       from core.parser import parse_mesh
+       from core.dto import GisDTO, MergeDTO
+
+       gim = parse_gim("t00_03.gim")
+       meshes = [parse_mesh(p) for p in gim.mesh_paths]
+       gis = GisDTO(); gis.source_path = gim.gis_path  # Phase 1
+       result = MergeDTO(root_name="lingzi_t00", mesh_dtos=meshes, gis_dto=gis)
+
+
+================================================================================
+2. GimDTO  (core/gim_parser.py:parse_gim)
+================================================================================
+
+   Manifesto de montagem. Nao contem geometria — apenas referencias a arquivos
+   e metadados de bounding box do asset completo.
+
+   gim = parse_gim("t00_03.gim")
+
+   gim.source_path       str              Caminho absoluto do .gim
+   gim.mesh_paths        list[str]        Paths game-relative dos .mesh referenciados
+   gim.gis_paths         list[str]        Paths game-relative dos .gis referenciados
+   gim.gis_path          str              (propriedade) Primeiro .gis (skeleton principal)
+   gim.mtg_path          str              Primeiro .mtg referenciado (materiais)
+   gim.has_bounding      bool             (propriedade) True se bounding box disponivel
+   gim.bounding_center   tuple(x,y,z)     Centro do asset | None
+   gim.bounding_half     tuple(x,y,z)     Half-extents (metade da dimensao) | None
+   gim.bounding_radius   float            Raio da bounding sphere | None
+
+   Paths sao game-relative com backslash, ex.:
+       "character\\female\\lingzi\\t00.mesh"
+   Para resolver para caminho absoluto, combine com o diretorio raiz do game.
+
+
+================================================================================
+3. MeshDTO  (core/parser.py:parse_mesh)
+================================================================================
+
+   dto = parse_mesh("t00.mesh")
+   # MeshDTO(105 bones, 12416 verts, 18511 faces, 5 submeshes)
+
+   dto.source_path      str              Caminho do arquivo original
+   dto.vertex_count     int              (propriedade) Total de vertices
+   dto.face_count       int              (propriedade) Total de faces
+   dto.has_skeleton     bool             (propriedade) True se tem skeleton
+
+   dto.positions        list[(x,y,z)]       Vertices CRUS (sem transform de eixo)
+   dto.normals          list[(x,y,z)]       Normais CRUS
+   dto.faces            list[(v1,v2,v3)]    Triangle List (indices 0-based)
+   dto.uvs              list[(u,v)]         UVs CRUS (sem flip de V)
+   dto.joint_indices    list[[b0,b1,b2,b3]] 4 bone indices por vertice (uint8)
+   dto.joint_weights    list[[w0,w1,w2,w3]] 4 pesos por vertice (float32)
+   dto.submeshes        list[SubMeshInfo]   Metadados de cada sub-mesh
+   dto.skeleton         SkeletonDTO         Hierarquia de ossos (ou None)
+
+
+================================================================================
+4. SkeletonDTO
+================================================================================
+
+   skel = dto.skeleton
+
+   skel.bone_count      int              (propriedade) Total de ossos
+   skel.bone_names      list[str]        (propriedade) Nomes em ordem original
+   skel.bone_parents    list[int]        (propriedade) Indices de parent (-1=root)
+   skel.bones           list[BoneData]   Lista completa de ossos
+   skel.has_dummy_root  bool             True se um root virtual foi criado
+   skel.get_bone_by_name("spine")        Busca por nome (retorna BoneData ou None)
+
+
+================================================================================
+5. BoneData
+================================================================================
+
+   bone = skel.bones[0]
+
+   bone.index           int              Posicao no array original
+   bone.name            str              Nome limpo (sem null bytes)
+   bone.parent_index    int              Indice do pai (-1 = root)
+   bone.bind_matrix     np.ndarray(4,4)  Bind pose matrix (world space)
+
+
+================================================================================
+6. SubMeshInfo
+================================================================================
+
+   sub = dto.submeshes[0]
+
+   sub.vertex_count     int              Vertices nesta submesh
+   sub.face_count       int              Faces nesta submesh
+   sub.uv_layers        int              Camadas UV (geralmente 1)
+   sub.color_len        int              Canais de vertex color
+
+
+================================================================================
+7. GisDTO  (Phase 2 — gis_parser.py, ainda nao implementado)
+================================================================================
+
+   Skeleton canonico + animacoes do personagem. Na Phase 1 apenas source_path
+   e populado manualmente; o restante sera preenchido pelo gis_parser.py.
+
+   gis = GisDTO()
+   gis.source_path      str              Caminho absoluto do .gis
+   gis.bone_names       list[str]        Nomes canonicos dos bones (Phase 2)
+   gis.bone_transforms  list[BoneTransform]  T-pose canonica (Phase 2)
+   gis.anim_clips       list[AnimClipDTO]    Clips de animacao (Phase 2)
+   gis.has_animations   bool             (propriedade) True se anim_clips populado
+   gis.bone_count       int              (propriedade) len(bone_names)
+
+
+================================================================================
+8. MergeDTO
+================================================================================
+
+   Agrega multiplos MeshDTO + GisDTO para exportacao como FBX unico.
+
+   merge = MergeDTO(root_name="lingzi", mesh_dtos=[dto1, dto2], gis_dto=gis)
+
+   merge.root_name         str              Nome do no raiz no FBX
+   merge.mesh_dtos         list[MeshDTO]    Todos os meshes do asset
+   merge.gis_dto           GisDTO | None    Animacoes (ou None)
+   merge.primary_skeleton  SkeletonDTO      (propriedade) Skeleton com mais bones
+   merge.mesh_count        int              (propriedade) len(mesh_dtos)
+   merge.has_animations    bool             (propriedade) gis_dto com clips
+
+
+================================================================================
+9. REGRAS IMPORTANTES
+================================================================================
+
+   a) DADOS CRUS: MeshDTO armazena dados EXATAMENTE como estao no arquivo.
+      Nenhuma transformacao de eixo e aplicada. Cada consumidor aplica a sua:
+      - FBX: (-x, y, z) para posicoes e normais, (u, 1-v) para UVs
+      - OBJ: (-x, y, z) para posicoes, (u, 1-v) para UVs
+      - PMX: (-x, y, -z) para posicoes
+
+   b) IMUTABILIDADE: Nunca modifique o DTO apos o parse. Se precisar transformar,
+      aplique no momento da escrita, nao no DTO.
+
+   c) SUBMESHES vs GLOBAL: Posicoes, normais e faces sao GLOBAIS (array contiguo).
+      UVs sao PER-SUBMESH (acumulados na ordem das submeshes).
+      Para saber quais vertices pertencem a submesh N:
+          inicio = sum(sub.vertex_count for sub in dto.submeshes[:N])
+          fim = inicio + dto.submeshes[N].vertex_count
+
+   d) DUMMY ROOT: Se has_dummy_root == True, o ultimo bone e artificial.
+      Criado para unificar multiplos roots. Nao existe no arquivo original.
+
+   e) JOINT INDICES: Valores 255 ou 65535 indicam slot vazio (sem influencia).
+      Os pesos correspondentes devem ser ignorados.
+
+   f) GIM PATHS: Os paths em GimDTO sao game-relative com backslash.
+      Nunca sao absolutos. O consumidor e responsavel por resolver o caminho
+      completo combinando com a raiz do diretorio de assets do game.
+
+   g) PARA O GIS PARSER (Phase 2): O gis_parser precisara de:
+      - dto.skeleton.bone_names    → mapear qual bone esta sendo animado
+      - dto.skeleton.bone_parents  → calcular transforms locais
+      - dto.skeleton.bones[i].bind_matrix → pose de referencia

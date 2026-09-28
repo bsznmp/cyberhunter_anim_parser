@@ -1,0 +1,109 @@
+=========================== TEMPLATE OPERACIONAL - RE 3D (CHECKLIST +
+LOGS) ===========================
+
+OBJETIVO: Padronizar execução de engenharia reversa com controle total
+de hipóteses, validação e debug.
+
+=========================== FLUXO OPERACIONAL (RESUMO)
+===========================
+
+[Hipótese] → [Parsing Parcial] → [Validação] → [Log] → [Ajuste] → LOOP
+
+Regra: Nunca avançar sem validação mínima.
+
+=========================== CHECKLIST GLOBAL ===========================
+
+[ ] Arquivo classificado (estrutura vs compressão) [ ] Endianness
+validado [ ] Alinhamento definido [ ] Mesh parcialmente validada [ ]
+Skeleton coerente [ ] Animação funcional (mesmo que parcial) [ ] Debug
+visual realizado [ ] Export básico funcional
+
+=========================== LOG PADRÃO (OBRIGATÓRIO)
+===========================
+
+Sempre registrar:
+
+-   offset atual
+-   tamanho de bloco
+-   tipo de dado interpretado
+-   valores relevantes
+
+Exemplo:
+
+offset: 0x1200 type: float32[3] value: (1.0, 0.5, -2.3)
+
+------------------------------------------------------------------------
+
+Exemplo avançado:
+
+[SECTION: VERTEX BUFFER] offset_start: 0x2000 stride: 32 vertex_count:
+1024
+
+[SECTION: SKELETON] bone_count: 64 root_index: 0
+
+=========================== TEMPLATE DE PARSER (PYTHON)
+===========================
+
+import struct
+
+def read_float3(data, offset): return struct.unpack_from(“<fff”, data,
+offset)
+
+def log(msg): print(msg)
+
+def parse_vertex_block(data, offset, count, stride): vertices = [] for i
+in range(count): pos = read_float3(data, offset + i * stride)
+log(f”[VERTEX] {i}: {pos}“) vertices.append(pos) return vertices
+
+=========================== CHECKPOINTS DE VALIDAÇÃO
+===========================
+
+1.  Mesh
+
+-   Forma reconhecível?
+-   Escala coerente?
+-   Não “explodido”?
+
+2.  Skeleton
+
+-   Hierarquia válida?
+-   Root consistente?
+
+3.  Animação
+
+-   Movimento fluido?
+-   Sem distorções absurdas?
+
+=========================== DEBUG RÁPIDO ===========================
+
+-   Exportar .obj sem animação
+-   Plotar vértices
+-   Testar apenas 1 bone
+
+Regra: Sempre isolar o problema antes de escalar.
+
+=========================== ERROS COMUNS ===========================
+
+[ ] Endianness errado [ ] Stride incorreto [ ] Ordem de quaternion
+errada [ ] Bind vs Inverse confundido [ ] Dados interleaved ignorados [
+] Animação interpretada como linear (quando é track)
+
+=========================== ESTRATÉGIA AVANÇADA
+===========================
+
+-   Parse 1 bone → validar → expandir
+-   Parse 10 vértices → validar → expandir
+-   Nunca parsear tudo de uma vez
+
+Regra de ouro: “Se você não consegue validar pequeno, não vai funcionar
+grande.”
+
+=========================== MODO INVESTIGAÇÃO (QUANDO TRAVAR)
+===========================
+
+1.  Comparar múltiplos arquivos
+2.  Procurar padrões repetidos
+3.  Reduzir escopo (menos dados)
+4.  Ir para Ghidra (se necessário)
+
+=========================== FIM

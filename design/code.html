@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Synthetic Lens | Asset Explorer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-container": "#00d98e",
+                        "secondary": "#44f6a8",
+                        "on-error": "#690005",
+                        "on-tertiary": "#460283",
+                        "secondary-fixed": "#50ffb0",
+                        "on-secondary-fixed": "#002112",
+                        "outline-variant": "#3b494c",
+                        "on-tertiary-fixed-variant": "#5e289b",
+                        "tertiary-fixed-dim": "#dab9ff",
+                        "on-secondary-container": "#005937",
+                        "primary": "#c3f5ff",
+                        "on-surface-variant": "#bac9cc",
+                        "surface-container": "#1b2025",
+                        "background": "#0f1419",
+                        "on-tertiary-fixed": "#2a0053",
+                        "primary-fixed": "#9cf0ff",
+                        "surface": "#0f1419",
+                        "inverse-on-surface": "#2c3137",
+                        "inverse-primary": "#006875",
+                        "on-error-container": "#ffdad6",
+                        "primary-container": "#00e5ff",
+                        "surface-container-lowest": "#0a0f14",
+                        "error-container": "#93000a",
+                        "surface-dim": "#0f1419",
+                        "outline": "#849396",
+                        "on-tertiary-container": "#713daf",
+                        "surface-container-highest": "#30353b",
+                        "on-surface": "#dee3ea",
+                        "on-secondary": "#003822",
+                        "tertiary-container": "#e1c5ff",
+                        "surface-container-low": "#171c21",
+                        "primary-fixed-dim": "#00daf3",
+                        "on-primary-fixed-variant": "#004f58",
+                        "tertiary-fixed": "#eedbff",
+                        "error": "#ffb4ab",
+                        "surface-container-high": "#252a30",
+                        "on-primary": "#00363d",
+                        "tertiary": "#f5e8ff",
+                        "on-secondary-fixed-variant": "#005233",
+                        "secondary-fixed-dim": "#1fe296",
+                        "surface-variant": "#30353b",
+                        "on-background": "#dee3ea",
+                        "on-primary-fixed": "#001f24",
+                        "inverse-surface": "#dee3ea",
+                        "surface-bright": "#353a3f",
+                        "on-primary-container": "#00626e",
+                        "surface-tint": "#00daf3"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f1419; color: #dee3ea; overflow: hidden; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { backdrop-filter: blur(20px); background: rgba(27, 32, 37, 0.6); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="flex flex-col h-screen select-none">
+<!-- Top Menu Bar (JSON: TopAppBar) -->
+<header class="flex justify-between items-center w-full px-6 h-12 bg-[#0f1419] z-50">
+<div class="flex items-center gap-8">
+<span class="text-[#00E5FF] font-bold tracking-tighter font-headline text-lg">Synthetic Lens</span>
+<nav class="flex gap-6">
+<a class="text-[#00E5FF] border-b-2 border-[#00E5FF] pb-1 font-['Manrope'] text-sm tracking-widest uppercase hover:text-[#c3f5ff] transition-colors" href="#">File</a>
+<a class="text-slate-400 font-['Manrope'] text-sm tracking-widest uppercase hover:text-[#c3f5ff] transition-colors" href="#">Help</a>
+<a class="text-slate-400 font-['Manrope'] text-sm tracking-widest uppercase hover:text-[#c3f5ff] transition-colors" href="#">View</a>
+<a class="text-slate-400 font-['Manrope'] text-sm tracking-widest uppercase hover:text-[#c3f5ff] transition-colors" href="#">Export</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-slate-500 text-[10px] font-medium tracking-widest uppercase">Engine V.4.2.0</span>
+</div>
+</header>
+<!-- Main Workspace Layout -->
+<main class="flex flex-1 overflow-hidden">
+<!-- Side Navigation Bar (JSON: SideNavBar) -->
+<aside class="fixed left-0 top-12 h-[calc(100%-3rem)] flex flex-col items-center py-4 bg-[#1b2025]/80 backdrop-blur-xl w-20 shadow-[0_0_32px_rgba(0,218,243,0.04)] z-40">
+<div class="flex flex-col gap-6 w-full items-center">
+<div class="group cursor-pointer flex flex-col items-center gap-1 w-full py-3 transition-all duration-300 ease-in-out text-slate-500 hover:bg-[#1b2025] hover:text-[#00E5FF]">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-['Inter'] text-xs font-medium">UI</span>
+</div>
+<!-- Active: Model View -->
+<div class="group cursor-pointer flex flex-col items-center gap-1 w-full py-3 transition-all duration-300 ease-in-out bg-[#00E5FF]/10 text-[#00E5FF] border-l-2 border-[#44f6a8]">
+<span class="material-symbols-outlined" data-icon="3d_rotation" style="font-variation-settings: 'FILL' 1;">3d_rotation</span>
+<span class="font-['Inter'] text-xs font-medium">Model View</span>
+</div>
+</div>
+<div class="mt-auto flex flex-col gap-6 w-full items-center pb-8">
+<div class="group cursor-pointer flex flex-col items-center gap-1 w-full py-2 text-slate-500 hover:text-[#00E5FF]">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</div>
+<div class="group cursor-pointer flex flex-col items-center gap-1 w-full py-2 text-slate-500 hover:text-[#00E5FF]">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="text-[10px] font-medium">Support</span>
+</div>
+</div>
+</aside>
+<!-- Content Area: Three Columns -->
+<div class="flex flex-1 ml-20 transition-all duration-300">
+<!-- Left Sidebar: Navigation Tree -->
+<section class="w-64 bg-surface-container-lowest flex flex-col border-r border-outline-variant/10">
+<div class="p-6">
+<h3 class="font-headline text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-6">Asset Tree</h3>
+<div class="space-y-4">
+<div class="flex items-center gap-2 text-primary cursor-pointer">
+<span class="material-symbols-outlined text-sm" data-icon="folder_open">folder_open</span>
+<span class="text-sm font-medium">Root</span>
+</div>
+<div class="pl-4 space-y-3">
+<div class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-sm" data-icon="folder">folder</span>
+<span class="text-sm">Characters</span>
+</div>
+<div class="flex items-center gap-2 text-primary bg-primary/5 py-1 px-2 -ml-2 rounded-lg border-l-2 border-secondary">
+<span class="material-symbols-outlined text-sm" data-icon="folder">folder</span>
+<span class="text-sm font-semibold">Environment</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-sm" data-icon="folder">folder</span>
+<span class="text-sm">Vehicles</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-sm" data-icon="folder">folder</span>
+<span class="text-sm">VFX Library</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-sm" data-icon="folder">folder</span>
+<span class="text-sm">Materials</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Center-Left Column: File List -->
+<section class="w-80 bg-surface-container flex flex-col border-r border-outline-variant/10">
+<div class="p-4 border-b border-outline-variant/10">
+<div class="relative group">
+<span class="absolute left-3 top-2.5 text-outline text-sm material-symbols-outlined" data-icon="search">search</span>
+<input class="w-full bg-surface-container-lowest border-none rounded-lg py-2 pl-10 pr-4 text-xs text-on-surface focus:ring-1 focus:ring-primary/30 transition-all outline-none" placeholder="Search files..." type="text"/>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto no-scrollbar p-2 space-y-1">
+<div class="group flex items-center justify-between p-3 rounded-xl hover:bg-surface-container-highest transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface-container-lowest flex items-center justify-center">
+<span class="material-symbols-outlined text-primary/60" data-icon="description">description</span>
+</div>
+<div>
+<p class="text-xs font-semibold text-on-surface">cyber_coupe_mesh.obj</p>
+<p class="text-[10px] text-on-surface-variant">42.4 MB • 3D Model</p>
+</div>
+</div>
+</div>
+<div class="group flex items-center justify-between p-3 rounded-xl bg-primary/10 border border-primary/20 transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="view_in_ar" style="font-variation-settings: 'FILL' 1;">view_in_ar</span>
+</div>
+<div>
+<p class="text-xs font-bold text-primary">prototype_v3_final.fbx</p>
+<p class="text-[10px] text-primary/70">128.1 MB • 3D Model</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="group flex items-center justify-between p-3 rounded-xl hover:bg-surface-container-highest transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface-container-lowest flex items-center justify-center">
+<span class="material-symbols-outlined text-on-tertiary-container" data-icon="image">image</span>
+</div>
+<div>
+<p class="text-xs font-semibold text-on-surface">environment_map.hdr</p>
+<p class="text-[10px] text-on-surface-variant">12.0 MB • HDR Image</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Main Center-Right Column: Viewport & Bottom Panels -->
+<section class="flex-1 flex flex-col relative overflow-hidden">
+<!-- 3D Viewport -->
+<div class="flex-1 relative bg-surface-container-lowest m-4 rounded-xl overflow-hidden shadow-2xl">
+<!-- Background Grid & Lighting Simulation -->
+<div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#44f6a8 0.5px, transparent 0.5px); background-size: 20px 20px;"></div>
+<div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#00daf3]/5"></div>
+<!-- Placeholder for Car Model -->
+<div class="absolute inset-0 flex items-center justify-center flex-col">
+<div class="w-4/5 h-3/5 relative">
+<img alt="Sleek sport car model on a studio grid background" class="w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(0,218,243,0.3)]" data-alt="High performance sport car 3D model prototype in engine viewport" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFqOBOZ4_M-YlSdb6JD5zsLhOwxJrxlfK74aH7mq_Pg0O5TSAb18dHWGjuZ3HK_7G0HIkG0hwcIXQAACG4WB4UnJj8-w9YnCya-tM0pnMQeT39j1mB29l4CAIUy8IoVgwyH27orMY-EYIcakIQQBc_JpjFn4S3w82xLbkl8QPSQxSrynO1eDdoyquwUvOQW2ngff6S5rc0lYfXfR_I2gRy-vze85rLfsxOPNxbedZqM1oAokWNF8Htjs9XUJPMBJ8cnhtthDpEiho_"/>
+</div>
+</div>
+<!-- Floating Controls -->
+<div class="absolute top-6 left-1/2 -translate-x-1/2 glass-panel p-1 rounded-full flex gap-1 border border-outline-variant/20 shadow-xl">
+<button class="px-4 py-1.5 rounded-full text-xs font-bold text-on-primary-container bg-primary-container transition-all">Shaded</button>
+<button class="px-4 py-1.5 rounded-full text-xs font-medium text-on-surface-variant hover:text-on-surface transition-all">Wireframe</button>
+<button class="px-4 py-1.5 rounded-full text-xs font-medium text-on-surface-variant hover:text-on-surface transition-all">Lighting</button>
+</div>
+<!-- Gizmo / Perspective Tool -->
+<div class="absolute top-6 right-6 w-16 h-16 glass-panel rounded-xl flex items-center justify-center border border-outline-variant/20">
+<span class="material-symbols-outlined text-primary/40 text-4xl" data-icon="deployed_code">deployed_code</span>
+</div>
+<!-- Viewport Metadata -->
+<div class="absolute bottom-6 left-6 flex gap-8">
+<div>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">Triangles</p>
+<p class="text-sm font-headline text-secondary">1.2M</p>
+</div>
+<div>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">Textures</p>
+<p class="text-sm font-headline text-primary">24 Active</p>
+</div>
+</div>
+</div>
+<!-- Bottom Panel -->
+<div class="h-64 mx-4 mb-4 flex gap-4">
+<!-- Active Assets List -->
+<div class="flex-[3] bg-surface-container-high rounded-xl p-4 flex flex-col border border-outline-variant/10">
+<div class="flex justify-between items-center mb-4">
+<h4 class="font-headline text-xs font-bold uppercase tracking-widest text-primary">Active Assets</h4>
+<span class="text-[10px] text-on-surface-variant">12 items listed</span>
+</div>
+<div class="flex-1 flex gap-4 overflow-x-auto no-scrollbar pb-2">
+<div class="min-w-[140px] flex flex-col gap-2 group cursor-pointer">
+<div class="h-32 rounded-lg bg-surface-container-lowest border border-outline-variant/10 p-2 overflow-hidden relative">
+<div class="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent"></div>
+<img alt="Texture map pattern diffuse" class="w-full h-full object-cover rounded opacity-80 group-hover:scale-110 transition-transform duration-500" data-alt="Cyberpunk vehicle diffuse texture map pattern" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCorXn1Zwvn3kDPgKewXwGjGzcVHbVMkUhJLkblC8L_ZzEwiofZtzZ00E6qtmNTkQiKmNS2PyBDHRyjhHh_a9Yizglo797C64UrVJ1TNW3Y7lR4HRrQ_u9xEdPxLiHAXVxs7nvHabdo0XepSWbZ5zFGVOl3NezklzGyk2uerq524rp8pzRM1d-aAnuZIJBmV9JbRQJYiOsAFoKfqMJ3nbzFXEgEGDPKcuaZTklRYUskvWtqgAB9kI_LNTYo9UjTFLopJBoiDeiXw6BA"/>
+</div>
+<p class="text-[10px] font-semibold text-on-surface truncate">vehicle_diffuse.png</p>
+<p class="text-[8px] text-on-surface-variant uppercase tracking-tighter">Diffuse • 4K</p>
+</div>
+<div class="min-w-[140px] flex flex-col gap-2 group cursor-pointer">
+<div class="h-32 rounded-lg bg-surface-container-lowest border border-outline-variant/10 p-2 overflow-hidden relative">
+<div class="absolute inset-0 bg-gradient-to-tr from-secondary/10 to-transparent"></div>
+<img alt="Normal map purple blue" class="w-full h-full object-cover rounded opacity-80 group-hover:scale-110 transition-transform duration-500" data-alt="High frequency normal map for vehicle body" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMV9PRYXDAyqiyMomX7YvIZkm0dkzrYC38cCvbkOmFveozrrhbp09BnBk30jc0TQEEDHewqbMWHLkMiKH-ZY4mLmAaF5iWNd8XDB6WDunvDGijewEFbg2wkSISWoHga8LGKhLo_N9JqBOEl8OUfxHARixCqcVsymWP_emlXl_fXrcX00uNQ_OPPrzr4OqOffvojVUCfw0zKM2JmnMPBpUDT6iYRrSdCE7xrMVuQ6inMvWMO3yv6FN1wCqGflj1zrgx97UOXqH0NS7N"/>
+</div>
+<p class="text-[10px] font-semibold text-on-surface truncate">vehicle_normal.png</p>
+<p class="text-[8px] text-on-surface-variant uppercase tracking-tighter">Normal • 4K</p>
+</div>
+<div class="min-w-[140px] flex flex-col gap-2 group cursor-pointer">
+<div class="h-32 rounded-lg bg-surface-container-lowest border border-outline-variant/10 p-2 overflow-hidden relative">
+<img alt="Roughness map black and white" class="w-full h-full object-cover rounded opacity-80 group-hover:scale-110 transition-transform duration-500" data-alt="Roughness texture map grayscale" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDT2VdN8e6ARzilW4CgVaye2WNu-gFyjzbPdPh4t1kf6x-yDEe1SyAe_NiKAbgdKoFTlWEsDrXqyzGOAH0CUlsdRYkACJwm_sko4cOWtMHW5auTPh7ZPTyez9nA7TLArrTf7SWWmWTx9NdWUH4fnlD4ZL7fcSA5uvVnx2R6uW9K-nyqmQu4-i4Tp7B5adPKh8p9_CpEFdH7Z3HuXIQX-HPpIZyqd1QfjpGY0kzaVBXITE9lOlR27_d18-WXPVLHq6PP1Aq72uDuQuFU"/>
+</div>
+<p class="text-[10px] font-semibold text-on-surface truncate">vehicle_rough.png</p>
+<p class="text-[8px] text-on-surface-variant uppercase tracking-tighter">Roughness • 2K</p>
+</div>
+</div>
+</div>
+<!-- Bitmap Thumbnails Gallery -->
+<div class="flex-[2] bg-surface-container-high rounded-xl p-4 flex flex-col border border-outline-variant/10">
+<div class="flex justify-between items-center mb-4">
+<h4 class="font-headline text-xs font-bold uppercase tracking-widest text-on-surface">Bitmaps</h4>
+<button class="w-6 h-6 flex items-center justify-center text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="folder_managed">folder_managed</span>
+</button>
+</div>
+<div class="grid grid-cols-4 gap-2 overflow-y-auto no-scrollbar">
+<div class="aspect-square rounded-md bg-surface-container-lowest border border-outline-variant/5 hover:border-primary/40 transition-all cursor-pointer overflow-hidden">
+<img alt="Texture swatch" class="w-full h-full object-cover" data-alt="Abstract material swatch bitmap" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACM8RsfN6nYxczE5vYJEL4xQur0Wh60h2Xdq2HWWW_NqPXAoYrZmS2h6d5VQrPMkrL3-L8mxBFuayV7i2v_IZkAJxLmf7gbdgL2IFX1wio41Ruc2CB46MyA1UVLHoek9wDjbNqlGjY4zHuDXlVmYi3f3Joa5yGuQ8AIjlvQNtfMJ9TuoCVQQuV6NJ3UHFoH79sa5twwhM1WlSERQum-oY6dBY4WXaLdniXEvExuN4uMBuaGIOEejLdn2pcp_H_ln2-BJVQphc_C2gk"/>
+</div>
+<div class="aspect-square rounded-md bg-surface-container-lowest border border-outline-variant/5 hover:border-primary/40 transition-all cursor-pointer overflow-hidden">
+<img alt="Texture swatch" class="w-full h-full object-cover" data-alt="Abstract material swatch bitmap" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDW14bQaewYzGtVKt4tpcWYY_g5MlOOFyw_lVqYpGoOTkdvWpMjnLTUnbme59yT5Hl8-weaJZoLeNI6BgsLhTJL4g4e9DDFEtVxSMQnYR8nXLezrtU1OziiGdvhX1yAzCi2ReUB44sLzfMz_Nc27-M7_Bnm9g446xQTcCsYeXZTRxp0r6-BxWjoKKnj9v3S3xFDcEZ8WXPdpTgpLUOVj_XtNEcDmTOxPC728mt4gKq-sLQgLJEXR7AxJjGSA1hNTX1GoJpN-VuUBxSn"/>
+</div>
+<div class="aspect-square rounded-md bg-surface-container-lowest border border-outline-variant/5 hover:border-primary/40 transition-all cursor-pointer overflow-hidden">
+<img alt="Texture swatch" class="w-full h-full object-cover" data-alt="Abstract material swatch bitmap" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7ZP1IItoLoKpomYm387B-ihK68iUW7SvPCtKUyrbN0TX67RsPKTrReYfxa_ShBYTOKs2tWa-owWfy0c-wANBXjkXS9kPFwLqA3Uj5tnFX4okfU8HX1B0hh_91wDDWjlhTGnlB3UUezEwPx1U3-uCMzgr71w1C1HxgqTA9TK65-JXJHxCIvCqOYQDt1t6fHG6WlBYuK_i2lash2F3yDbt2dnpPuZ7eQBwBkKp-sAO5nQ_xqTldRA4TzkIaUZMCXmTHj915zywoYH2Y"/>
+</div>
+<div class="aspect-square rounded-md bg-surface-container-lowest border border-outline-variant/5 hover:border-primary/40 transition-all cursor-pointer overflow-hidden">
+<img alt="Texture swatch" class="w-full h-full object-cover" data-alt="Abstract material swatch bitmap" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdrQq4SyttY-w9_hr5qEKM7X9qc9DTQlfbeW_wq5QxtJbIVGYNQPFqfzB9wob8HpQ3zeqiywJDTXlV0-hoGrHj9mfqyYTvk9cRao2Dq2o2dzGqcUGyhR1tZY0mXreeaMcLzqx3OvwI-5h_JiaRoW9YQEDwnaI6QKb1BY687p3sEJG0tfO3dMr0bJp4BM-ccm3DTe0bGGU--ZP1TVac8zVPudwo6eJhh6NSXSgSUjfPz43fhbiWNam24AIKk54oVOpliuEKHPa3GB-8"/>
+</div>
+<div class="aspect-square rounded-md bg-surface-container-lowest border border-outline-variant/5 hover:border-primary/40 transition-all cursor-pointer overflow-hidden">
+<img alt="Texture swatch" class="w-full h-full object-cover" data-alt="Abstract material swatch bitmap" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDC6JLdGKxuAsZ7tKKFn8W6D7wCJToWkETGSLxrX52uCItzPSC5YB5WGDJwps7iZ_Ac4y3ykeIw1-UHFHjnA5eWmGkWax7mZx9HQwmF2OHGWQ3eKxU8l9mI7xWgiNkL7Yaw6wF26pYcrrwqOz1NtZrMaikDAR4OyEgGKD-mY-gFlaSfIQw66EPYbQl_fG-ptHOQQvJGpHAfuzT4elflGs265rNcRhdqNMabnBRcO5VtKQ_u4iuyDGDKMKR-XuK2txX_rrkIE7p7dBgF"/>
+</div>
+<div class="aspect-square rounded-md bg-surface-container-lowest border border-outline-variant/5 hover:border-primary/40 transition-all cursor-pointer overflow-hidden">
+<img alt="Texture swatch" class="w-full h-full object-cover" data-alt="Abstract material swatch bitmap" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmrJSb6WPAtEJSYnJULys2MjY-TBpNwX3aDCA3HjtY6kuFbf_t6Nh3cyutLbHqv0lXtV0SoE9VhP9-Di-AjF6cp9gyX_A7ENYJ69nEACR70TZblf5eE5uanAcP4HHh0xQvRH5Z8m0rJ8ik3FkXehJo7j0Ajzfwo_XEWzelRayN5G_9bPzaQXxIdvqqXO4brM28XL9CYaMGmVzh3TpuFJepz0OJh7j8HoRNFx8tGHw0qIa6mzKVU_YV6NCPJbiQ3yZlp5Hrzu4nKjMF"/>
+</div>
+<div class="aspect-square rounded-md bg-surface-container-lowest border border-outline-variant/5 hover:border-primary/40 transition-all cursor-pointer overflow-hidden">
+<img alt="Texture swatch" class="w-full h-full object-cover" data-alt="Abstract material swatch bitmap" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxmVNQmCwAq5-VRzhcFOEVWgKRi8jOwcpsJemAyydr7RqwQeRSJlcIuQ-XxS0oiH2iyEHiwFYS4OSGNjFCwao1eudqQW0HNHb_sMgPfvXdkU_xT4TSW4nOT7DFFhCNEOr7GYHPXTsC1ZT5-vCmCElmG0tbkLFI4yXkDe4_TxhcU-20ch-ZIMR7jwqBlSpCkk4sKXCkGquOXnLmNX_GHcC2fyP8tWvSYuYSnS21E-BFZK8zslcagSIq5aXItWOJM5nVtW8GdppHkuDZ"/>
+</div>
+<div class="aspect-square rounded-md bg-surface-container-lowest border border-outline-variant/5 hover:border-primary/40 transition-all cursor-pointer overflow-hidden">
+<img alt="Texture swatch" class="w-full h-full object-cover" data-alt="Abstract material swatch bitmap" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0lPMTEY2DDd20gtXSxXgAgbsKi6YprUpAQXE6Y8TOFZ9XgBf0pDzekUNRTPadOO-vLQbBnELUeYefoYcWt6a2nq3afoWaJl9vcxgbkS6rYznBSb8dxRoRbVSaivN_7EJ8Z3QfeOviXfKeb0tzSa0skmWLlUU2Aqrm0MKd63p-udxOa2pDVYqgwXgAMB-CXqbCy3nCS_ZFVAjBEugq2MGR6lFJpKk_0mlG3jJoloMpdX_SMbyLf8EJGcu9f67aPsEjJUXmRYAWMvyF"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Global Footer (JSON: Footer) -->
+<footer class="fixed bottom-0 w-full h-8 flex items-center justify-between px-4 z-50 bg-[#0a0f14] border-t border-[#3b494c]/15">
+<p class="font-['Inter'] text-[10px] text-slate-500">© 2024 Synthetic Lens Engine</p>
+<div class="flex gap-4">
+<a class="font-['Inter'] text-[10px] text-slate-600 hover:text-slate-300" href="#">Documentation</a>
+<a class="font-['Inter'] text-[10px] text-slate-600 hover:text-slate-300" href="#">API Reference</a>
+<a class="font-['Inter'] text-[10px] text-slate-600 hover:text-slate-300" href="#">Status</a>
+</div>
+</footer>
+</body></html>
